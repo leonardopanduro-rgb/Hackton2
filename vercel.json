@@ -1,3 +1,9 @@
 {
-  "rewrites": [{ "source": "/(.*)", "destination": "/" }]
+  "rewrites": [
+    {
+      "source": "/api/v1/:path*",
+      "destination": "https://hackaton-20261-front-587720740455.us-east1.run.app/api/v1/:path*"
+    },
+    { "source": "/(.*)", "destination": "/" }
+  ]
 }

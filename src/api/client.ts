@@ -171,6 +171,12 @@ export function getErrorMessage(error: unknown): string {
   if (error instanceof ApiError) {
     return error.message
   }
+  if (error instanceof TypeError && error.message === 'Failed to fetch') {
+    if (window.location.hostname === '127.0.0.1') {
+      return 'No se pudo conectar con la API. Abre la app como http://localhost:5173, no como 127.0.0.1.'
+    }
+    return 'No se pudo conectar con la API. Revisa conexion, CORS o URL del backend.'
+  }
   if (error instanceof Error) {
     return error.message
   }

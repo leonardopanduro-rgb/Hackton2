@@ -1,3 +1,11 @@
+import type { TropelSort } from '../api/types.ts'
+
+export const tropelSortLabels: Record<TropelSort, string> = {
+  'name,asc': 'Nombre ascendente',
+  'updatedAt,desc': 'Actualizacion reciente',
+  'chaosIndex,desc': 'Mayor caos',
+}
+
 export function includesOption<const T extends readonly string[]>(options: T, value: string): value is T[number] {
   return (options as readonly string[]).includes(value)
 }

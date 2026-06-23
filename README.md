@@ -23,7 +23,7 @@ No usa React Query, SWR, TanStack Query, RTK Query, Material UI, Ant Design, Cha
 Crear `.env` a partir de `.env.example`:
 
 ```properties
-VITE_API_BASE_URL=https://<backend-url>/api/v1
+VITE_API_BASE_URL=/api/v1
 VITE_TEAM_CODE=TEAM-0XX
 VITE_EMAIL=operator@tuckersoft.com
 ```
@@ -54,6 +54,7 @@ npm run build
 
 - Las respuestas de API estan tipadas en `src/api/types.ts`; no se usa `any` para DTOs.
 - El cliente HTTP central agrega `Authorization: Bearer <jwt>` y normaliza errores del backend.
+- La app consume `/api/v1` por el mismo origen del frontend; Vite, Vercel y Netlify lo proxyean al backend para evitar fallos CORS en PATCH.
 - La sesion se restaura con `/auth/me` al recargar.
 - Tropeles usa paginacion real del servidor y mantiene filtros, busqueda, pagina, size y sort en la URL.
 - Requests antiguas de Tropeles se cancelan con `AbortController` y se descartan con un contador de secuencia.

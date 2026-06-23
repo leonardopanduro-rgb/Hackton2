@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { getErrorMessage, getSectors, getTropels, isAbortError } from '../api/client.ts'
 import {
   pageSizeOptions,
@@ -13,7 +13,7 @@ import {
 import { useAuth } from '../auth/AuthProvider.tsx'
 import { EmptyBlock, ErrorBlock, LoadingBlock } from '../components/StateBlocks.tsx'
 import { Badge, Button, Select, TextInput } from '../components/ui.tsx'
-import { formatDateTime, severityTone } from '../utils/options.ts'
+import { formatDateTime, severityTone, tropelSortLabels } from '../utils/options.ts'
 import { includesNumber, includesOption } from '../utils/options.ts'
 import { useSearchParams } from 'react-router-dom'
 
@@ -132,34 +132,48 @@ export function TropelsPage() {
         <p className="mt-1 text-sm text-stone-600">Paginacion, filtros y ordenamiento desde el servidor.</p>
       </div>
 
-      <div className="grid gap-3 rounded border border-stone-200 bg-white p-4 lg:grid-cols-[1.2fr_repeat(5,minmax(0,1fr))]">
-        <TextInput
-          value={query.q}
-          maxLength={80}
-          placeholder="Buscar"
-          onChange={(event) => updateQuery({ q: event.target.value }, true)}
-        />
-        <Select value={query.species} onChange={(event) => updateQuery({ species: event.target.value as TropelQuery['species'] }, true)}>
-          <option value="">Especie</option>
-          {speciesOptions.map((option) => <option key={option} value={option}>{option}</option>)}
-        </Select>
-        <Select
-          value={query.vitalState}
-          onChange={(event) => updateQuery({ vitalState: event.target.value as TropelQuery['vitalState'] }, true)}
-        >
-          <option value="">Estado vital</option>
-          {vitalStateOptions.map((option) => <option key={option} value={option}>{option}</option>)}
-        </Select>
-        <Select value={query.sectorId} onChange={(event) => updateQuery({ sectorId: event.target.value }, true)}>
-          <option value="">Sector</option>
-          {sectors.map((sector) => <option key={sector.id} value={sector.id}>{sector.sectorCode}</option>)}
-        </Select>
-        <Select value={query.sort} onChange={(event) => updateQuery({ sort: event.target.value as TropelQuery['sort'] }, true)}>
-          {tropelSortOptions.map((option) => <option key={option} value={option}>{option}</option>)}
-        </Select>
-        <Select value={query.size} onChange={(event) => updateQuery({ size: Number(event.target.value) as TropelQuery['size'] }, true)}>
-          {pageSizeOptions.map((option) => <option key={option} value={option}>{option} filas</option>)}
-        </Select>
+      <div className="grid gap-3 rounded border border-stone-200 bg-white p-4 sm:grid-cols-2 xl:grid-cols-[1.25fr_repeat(5,minmax(0,1fr))]">
+        <FilterField label="Busqueda">
+          <TextInput
+            value={query.q}
+            maxLength={80}
+            placeholder="Nombre o guardian"
+            onChange={(event) => updateQuery({ q: event.target.value }, true)}
+          />
+        </FilterField>
+        <FilterField label="Especie">
+          <Select value={query.species} onChange={(event) => updateQuery({ species: event.target.value as TropelQuery['species'] }, true)}>
+            <option value="">Todas</option>
+            {speciesOptions.map((option) => <option key={option} value={option}>{option}</option>)}
+          </Select>
+        </FilterField>
+        <FilterField label="Estado vital">
+          <Select
+            value={query.vitalState}
+            onChange={(event) => updateQuery({ vitalState: event.target.value as TropelQuery['vitalState'] }, true)}
+          >
+            <option value="">Todos</option>
+            {vitalStateOptions.map((option) => <option key={option} value={option}>{option}</option>)}
+          </Select>
+        </FilterField>
+        <FilterField label="Sector">
+          <Select value={query.sectorId} onChange={(event) => updateQuery({ sectorId: event.target.value }, true)}>
+            <option value="">Todos</option>
+            {sectors.map((sector) => <option key={sector.id} value={sector.id}>{sector.sectorCode}</option>)}
+          </Select>
+        </FilterField>
+        <FilterField label="Orden">
+          <Select value={query.sort} onChange={(event) => updateQuery({ sort: event.target.value as TropelQuery['sort'] }, true)}>
+            {tropelSortOptions.map((option) => (
+              <option key={option} value={option}>{tropelSortLabels[option]}</option>
+            ))}
+          </Select>
+        </FilterField>
+        <FilterField label="Filas">
+          <Select value={query.size} onChange={(event) => updateQuery({ size: Number(event.target.value) as TropelQuery['size'] }, true)}>
+            {pageSizeOptions.map((option) => <option key={option} value={option}>{option} filas</option>)}
+          </Select>
+        </FilterField>
       </div>
 
       <div className="min-h-[34rem] rounded border border-stone-200 bg-white">
@@ -169,7 +183,27 @@ export function TropelsPage() {
           <div className="p-4"><EmptyBlock title="Sin resultados" message="No hay tropeles para los filtros actuales." /></div>
         ) : null}
         {page ? (
-          <div className="overflow-x-auto">
+          <>
+          <div className="grid gap-3 p-3 md:hidden">
+            {content.map((tropel) => (
+              <article key={tropel.id} className="rounded border border-stone-200 bg-stone-50 p-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <h2 className="truncate text-base font-semibold text-stone-950">{tropel.name}</h2>
+                    <p className="mt-1 text-xs text-stone-600">{tropel.sector.sectorCode} - {tropel.guardianName}</p>
+                  </div>
+                  <Badge tone={severityTone(tropel.vitalState)}>{tropel.vitalState}</Badge>
+                </div>
+                <div className="mt-3 grid grid-cols-3 gap-2 text-sm">
+                  <MobileMetric label="Especie" value={tropel.species} />
+                  <MobileMetric label="Energia" value={String(tropel.energyLevel)} />
+                  <MobileMetric label="Caos" value={String(tropel.chaosIndex)} />
+                </div>
+                <p className="mt-3 text-xs text-stone-500">Actualizado: {formatDateTime(tropel.updatedAt)}</p>
+              </article>
+            ))}
+          </div>
+          <div className="hidden overflow-x-auto md:block">
             <table className="w-full min-w-[760px] border-collapse text-left text-sm">
               <thead className="border-b border-stone-200 bg-stone-50 text-xs uppercase text-stone-500">
                 <tr>
@@ -198,6 +232,7 @@ export function TropelsPage() {
             </table>
             {loading ? <div className="border-t border-stone-100 p-3 text-sm text-stone-600">Actualizando vista...</div> : null}
           </div>
+          </>
         ) : null}
       </div>
 
@@ -219,5 +254,23 @@ export function TropelsPage() {
         </div>
       </div>
     </section>
+  )
+}
+
+function FilterField({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <label className="grid gap-1 text-xs font-semibold uppercase text-stone-500">
+      {label}
+      {children}
+    </label>
+  )
+}
+
+function MobileMetric({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded bg-white p-2">
+      <p className="text-[11px] font-semibold uppercase text-stone-500">{label}</p>
+      <p className="mt-1 truncate font-medium text-stone-900">{value}</p>
+    </div>
   )
 }

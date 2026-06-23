@@ -14,14 +14,28 @@ interface AuthContextValue {
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
+const expectedTeamCode = import.meta.env.VITE_TEAM_CODE
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [status, setStatus] = useState<AuthStatus>('checking')
-  const [session, setSession] = useState<LoginResponse | null>(() => readStoredSession())
+  const [session, setSession] = useState<LoginResponse | null>(() => {
+    const stored = readStoredSession()
+    if (stored && expectedTeamCode && stored.user.teamCode !== expectedTeamCode) {
+      clearStoredSession()
+      return null
+    }
+    return stored
+  })
 
   useEffect(() => {
     const stored = readStoredSession()
     if (!stored) {
+      setStatus('anonymous')
+      setSession(null)
+      return undefined
+    }
+    if (expectedTeamCode && stored.user.teamCode !== expectedTeamCode) {
+      clearStoredSession()
       setStatus('anonymous')
       setSession(null)
       return undefined
