@@ -4,7 +4,9 @@ Frontend para la Hackathon TropelCare Pizza Protocol. La app consume la API cerr
 
 ## Integrantes
 
-- Leonardo Panduro
+- Leonardo Daniel Panduro Chinchay
+- Valentina Alvarez Beraun
+- Steven Daniel Norena Paredes
 
 ## Stack
 
