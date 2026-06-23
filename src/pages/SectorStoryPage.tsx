@@ -9,6 +9,12 @@ import { Badge, Button } from '../components/ui.tsx'
 import { useReducedMotion } from '../hooks/useReducedMotion.ts'
 import { severityTone } from '../utils/options.ts'
 
+const METRIC_LABELS: Record<string, string> = {
+  stability: 'Estabilidad',
+  energy: 'Energia',
+  alerts: 'Alertas',
+}
+
 const colorTokens: Record<string, string> = {
   emerald: '#047857',
   teal: '#0f766e',
@@ -198,7 +204,7 @@ export function SectorStoryPage() {
               <div className="mt-6 grid gap-3 sm:grid-cols-3">
                 {Object.entries(stage.metrics).map(([key, value]) => (
                   <div key={key} className="rounded border border-stone-200 bg-white p-3">
-                    <p className="text-xs font-semibold uppercase text-stone-500">{key}</p>
+                    <p className="text-xs font-semibold uppercase text-stone-500">{METRIC_LABELS[key] ?? key}</p>
                     <p className="mt-1 text-2xl font-semibold text-stone-950">{value}</p>
                   </div>
                 ))}

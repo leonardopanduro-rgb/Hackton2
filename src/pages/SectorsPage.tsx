@@ -6,10 +6,12 @@ import type { SectorLite } from '../api/types.ts'
 import { useAuth } from '../auth/AuthProvider.tsx'
 import { EmptyBlock, ErrorBlock, LoadingBlock } from '../components/StateBlocks.tsx'
 import { Badge, Button } from '../components/ui.tsx'
+import { useReducedMotion } from '../hooks/useReducedMotion.ts'
 
 export function SectorsPage() {
   const { token } = useAuth()
   const navigate = useNavigate()
+  const reducedMotion = useReducedMotion()
   const [sectors, setSectors] = useState<SectorLite[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -34,7 +36,7 @@ export function SectorsPage() {
 
   function openStory(id: string): void {
     const go = () => navigate(`/sectors/${id}/story`)
-    if (document.startViewTransition) {
+    if (document.startViewTransition && !reducedMotion) {
       document.startViewTransition(go)
       return
     }
